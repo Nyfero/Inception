@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  wordpress:
+    restart: always
+
+  mariadb:
+    restart: always
+
+  nginx:
+    restart: always
