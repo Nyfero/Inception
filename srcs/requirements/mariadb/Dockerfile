@@ -1,16 +1,20 @@
 FROM alpine
 
-MAINTAINER ${USER}
+MAINTAINER ${LOGIN}
 
 #install mariadb
 RUN apk update \
 && apk update \
-&& apk add mariadb mariadb-common mariadb-client
-
-#RUN /etc/init.d/mariadb setup
-#RUN rc-service mariadb start
-#RUN rc-update add mariadb default
-#RUN rc-status default
+&& apk add mysql mysql-client
+#&& apk add mariadb mariadb-common mariadb-client
 
 #clean image
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#config mariadb
+COPY conf/config.sh config.sh
+
+RUN mkdir -p /run/mysqld \
+&& chown -R mysql:mysql /run/mysqld
+
+ENTRYPOINT ["sh", "config.sh"]
