@@ -17,4 +17,5 @@ RUN apk update && apk upgrade \
 #import mariadb config file
 #COPY conf/config /etc/config
 
+#launch the script
 #ENTRYPOINT ["sh", "init.sh"]
