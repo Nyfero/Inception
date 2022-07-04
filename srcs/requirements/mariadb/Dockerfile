@@ -1,20 +1,20 @@
-FROM alpine
+#import alpine:3.15 from dockerhub
+FROM alpine:3.15
 
-MAINTAINER ${LOGIN}
+#set a maintainer
+LABEL maintainer="gsap@student.42.fr"
 
-#install mariadb
-RUN apk update \
-&& apk update \
-&& apk add mysql mysql-client
-#&& apk add mariadb mariadb-common mariadb-client
+#update alpine and add mariadb package
+RUN apk update && apk upgrade \
+&& apk add mariadb mariadb-common
 
 #clean image
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#config mariadb
-COPY conf/config.sh config.sh
+#import init script
+#COPY conf/init.sh /usr/bin/init.sh
 
-RUN mkdir -p /run/mysqld \
-&& chown -R mysql:mysql /run/mysqld
+#import mariadb config file
+#COPY conf/config /etc/config
 
-ENTRYPOINT ["sh", "config.sh"]
+#ENTRYPOINT ["sh", "init.sh"]

@@ -1,0 +1,14 @@
+#a comprendre
+USE mysql;
+FLUSH PRIVILEGES ;
+GRANT ALL ON *.* TO 'root'@'%' identified by '1234' WITH GRANT OPTION ;
+GRANT ALL ON *.* TO 'root'@'localhost' identified by '1234' WITH GRANT OPTION ;
+SET PASSWORD FOR 'root'@'localhost'=PASSWORD('1234') ;
+DROP DATABASE IF EXISTS test ;
+FLUSH PRIVILEGES ;
+CREATE DATABASE wordpress CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'gsap'@'%' IDENTIFIED by '1234';
+CREATE USER 'gsap'@'localhost' IDENTIFIED by '1234';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO 'gsap'@'%';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO 'gsap'@'localhost';
+FLUSH PRIVILEGES;
