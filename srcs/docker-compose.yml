@@ -1,0 +1,88 @@
+# latest version of Docker Compose
+version: '3.8'
+
+# list of all services that Docker Compose must built
+services:
+
+#--------------------------------mariadb docker--------------------------------#
+  mariadb:
+    # if the image doesn't exist go there to build it
+    build: ./requirements/mariadb/
+    # set a name for the container
+    container_name: mariadb
+    # add this file as env
+    env_file:
+      - .env
+    # choose an image to build the container
+    image: mariadb-image
+    # volume's name: link container's volume to host machine's volume
+    volumes:
+      - db:/var/lib/mysql
+    # link all my container
+    networks:
+      - inception
+    # expose this port for my service
+    expose:
+      - "3306"
+    # allow docker to relaucn mariadb if an error occured
+    restart: always
+#------------------------------------------------------------------------------#
+
+#----------------------------- wordpress docker--------------------------------#
+  wordpress:
+    # execute wordpress if mariadb is up
+    depends_on:
+      - mariadb
+    build: ./requirements/wordpress
+    container_name: wordpress
+    image: wordpress-image
+    env_file:
+      - .env
+    volumes:
+      - "wp:/var/www/html/wordpress"
+    networks:
+      - inception
+    expose:
+      - "9000"
+    restart: always
+#------------------------------------------------------------------------------#
+
+#---------------------------------nginx docker---------------------------------#
+  nginx:
+    depends_on:
+      - wordpress
+    build: ./requirements/nginx
+    container_name: nginx
+    image: nginx-image
+    env_file:
+      - .env
+    volumes:
+      - "wp:/var/www/html/wordpress"
+    networks:
+      - inception
+    ports:
+      - "443:443"
+    restart: always
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/sap/data/mariadb
+  wp:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: /home/sap/data/wordpress
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
+networks:
+  inception:
+    driver: bridge
+#------------------------------------------------------------------------------#
