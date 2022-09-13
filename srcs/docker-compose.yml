@@ -1,0 +1,67 @@
+version: '3.1'
+
+services:
+#   MARIADB
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    build: requirements/mariadb
+    env_file: ./.env
+    volumes:
+    - db:/var/lib/mysql
+    networks:
+      - inception
+    restart: always
+
+#   WORDPRESS
+  wordpress:
+    depends_on:
+      - mariadb
+    container_name: wordpress
+    image : wordpress
+    build: requirements/wordpress
+    env_file: ./.env
+    volumes:
+    - wp:/var/www/html
+    networks:
+      - inception
+    restart: always
+
+#   NGINX
+  nginx:
+    depends_on:
+      - wordpress
+    container_name: nginx
+    image : nginx
+    build: requirements/nginx
+    env_file: ./.env
+    ports:
+      - "443:443"
+    volumes:
+    - wp:/var/www/html
+    networks:
+      - inception
+    restart: always
+
+#   NETWORKS
+networks:
+  inception:
+    driver: bridge
+
+#   VOLUMES
+volumes:
+    db:
+       driver: local # default
+       driver_opts:
+         type: none
+         device: /home/sap/data/database
+         o: bind
+    wp:
+       driver: local
+       driver_opts:
+         type: none
+         device: /home/sap/data/www
+         o: bind
+
+
+#with bridge we can create an intern network for all the containers (great when you have one service per container)
