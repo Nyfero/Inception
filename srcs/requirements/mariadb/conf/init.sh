@@ -1,48 +1,38 @@
-# set -e pour exit if we have non-zero exit code
-# set -x pour debugger
-
-#------------WAITING FOR SERVER------------#
+#	Start mysql
 service mysql start
+
+# Wait that mysql is started
 while ! mysqladmin ping; do
 	sleep 2
 done
 
-#we will enter the mysql to configurate user and create the Wordpress database
-#------------CREATE DATABASE------------#
+#	Create 'wordpress' database
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
 
-#------------CREATE USER------------#
-#1 - ADMIN
-mysql -u root -e "CREATE USER IF NOT EXISTS '${MYSQL_ROOT}'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ROOT}'@'%';"
-#2 - USER (login42)
+#	Remove 'test' database
+mysql -u root -e "DROP DATABASE IF EXISTS 'test';"
+
+#	Create admin for wordpress database
+mysql -u root -e "CREATE USER IF NOT EXISTS '${MYSQL_ADMIN}'@'%' IDENTIFIED BY '${MYSQL_ADMIN_PASSWORD}';"
+mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ADMIN}'@'%';"
+
+# Reload access right
+mysql -u root -e "FLUSH PRIVILEGES;"
+
+# Create user for wordpress database
 mysql -u root -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_USER_PASSWORD}';"
 mysql -u root -e "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';"
 
-#------------DELETE USER------------#
-#We don't need root anymore because we have ADMIN with all right
-mysql -u root -e "DELETE FROM mysql.user WHERE user='';"   #delete anonymous user
+mysql -u root -e "FLUSH PRIVILEGES;"
+
+#	Remove root and anonymous user
+mysql -u root -e "DELETE FROM mysql.user WHERE user='';"
 mysql -u root -e "DELETE FROM mysql.user WHERE user='root';"
 
-#------------RELOAD ALL USERS RULES------------#
-mysql -u root -e "FLUSH PRIVILEGES;" #reload all user rules
+mysql -u root -e "FLUSH PRIVILEGES;"
 
-#------------RELOAD MYSQL------------#
+#	Restart mysql
 killall mysqld
 
+# Exec this file as a command
 exec "$@"
-
-
-#------------INDEX------------#
-#mysql -u root -e
-#stand for mysql --user root --execute
-
-#------------INTERACTION------------#
-# 1- connection
-# Since we have delete root we have to connect with admin
-# mysql -u nyfero -p  (then the pw) nyfero_pwd
-# 2- The database
-# show databases;
-# use wordpress;
-# show tables;
-# from wp_users;
